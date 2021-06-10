@@ -1,0 +1,59 @@
+version: 2
+jobs:
+  # local test:
+  #   docker:
+  #     - image: circleci/php:7.3-node-browsers
+  #   steps:
+  #     - checkout
+  #     - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
+  #     - run: sudo docker-php-ext-install zip
+  #     # Download and cache dependencies
+  #     - restore_cache:
+  #         keys:
+  #           # "composer.lock" can be used if it is committed to the repo
+  #           - v1-dependencies-{{ checksum "composer.json" }}
+  #           # fallback to using the latest cache if no exact match is found
+  #           - v1-dependencies-
+  #     - run: composer install -n --prefer-dist
+  #     - run: ./vendor/bin/phpunit
+  #     #- sonarcloud/scan_with_npm:
+  #      # context: sonarcloud
+  #     #- sonarcloud/scan:
+  #      # context: sonarcloud
+
+  jobs:
+    wdio test:
+      docker:
+        - image: circleci/node:lts-browsers
+      working_directory: ~/repo
+      steps:
+        - checkout
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "package.json" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-dependencies-
+        - run: npm install
+        - save_cache:
+            paths:
+              - node_modules
+            key: v1-dependencies-{{ checksum "package.json" }}
+        - run: npm install @wdio/cli
+        - run: cd wdio && npx wdio run wdio.conf.js
+        - run: cd wdio && allure open
+
+workflows:
+  version: 2
+  main:
+    jobs:
+     - local test
+  build:
+    jobs:
+      - build
+      
+  
+
+      
+  
+      
+
